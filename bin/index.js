@@ -17,7 +17,7 @@ if (argv.length == 3) {
   } else {
     //solve expression
     const expression = new Expression(argv[2]);
-    console.log(expression.solve());
+    console.log(expression.toString() + " = " + expression.solve());
   }
 } else {
   console.log(help);
