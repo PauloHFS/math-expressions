@@ -13,28 +13,40 @@ module.exports = class Expression {
   }
 
   solve() {
-    this.position = 0;
+    let position = 0;
 
-    while (this.position < this.expression.length) {
-      const tkn = this.expression[this.position];
-      if (tkn == ")") {
-        const result = this.efetuarOperacao(
-          this.operators.pop,
-          this.operands.pop,
-          this.operands.pop
-        );
-        this.operands.push(result);
-        this.operators.pop();
-      } else if (tkn == "+") {
-        this.operators.push(tkn);
-      } else {
-        //numeros
-        //TODO: verificar se o numero é maior que o intervalo de 1 caracter
+    while (position < this.expression.length) {
+      const tkn = this.expression[position];
 
-        this.operands.push(parseInt(tkn));
+      switch (tkn) {
+        case ")":
+          const result = this.efetuarOperacao(
+            this.operators.pop(),
+            this.operands.pop(),
+            this.operands.pop()
+          );
+          this.operands.push(result);
+          this.operators.pop();
+          break;
+        case "(":
+        case "+":
+        case "-":
+        case "*":
+        case "/":
+        case "^":
+          this.operators.push(tkn);
+          break;
+        case " ":
+          break;
+        default:
+          //TODO: verificar se o numero é maior que o intervalo de 1 caracter
+          this.operands.push(parseInt(tkn));
+          break;
       }
-      this.position++;
+      position++;
     }
+
+    return this.operands.pop();
   }
 
   efetuarOperacao(operacao, a, b) {
@@ -54,6 +66,6 @@ module.exports = class Expression {
   }
 
   toString() {
-    return "Operands: " + this.operands + "\n" + "Operators: " + this.operators;
+    return this.expression;
   }
 };
