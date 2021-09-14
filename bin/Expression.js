@@ -8,6 +8,10 @@ module.exports = class Expression {
     }
   }
 
+  /*
+    Retorna a solucão da expressão.
+    Todo: verificar casos de erros e expressões mal formatadas
+  */
   solve(verbose = false) {
     let numeros = [];
     let operadores = [];
@@ -56,13 +60,18 @@ module.exports = class Expression {
             verbose
           );
 
-          numeros.push(result);
+          if (result == undefined) {
+            console.log("Expressão mal formatada!");
+            break;
+          } else {
+            numeros.push(result);
+          }
         }
         operadores.pop();
       } else {
         //!tkn é um numero
         let num = tkn;
-        while (position + 1 < this.expression.length) {
+        while (position + 1 <= this.expression.length) {
           tkn = this.expression[position + 1];
           if (!isNaN(tkn)) {
             num += tkn;
@@ -104,7 +113,7 @@ module.exports = class Expression {
       ver = `${a}x${b}=${result}`;
     } else if (operacao == "/") {
       if (a == 0) {
-        result = NaN;
+        result = undefined;
         ver = `${a}/${b} não pode ser feito!`;
       } else {
         result = b / a;
@@ -119,12 +128,13 @@ module.exports = class Expression {
       } else if (b == undefined) {
         result = a;
       }
-      ver = `( ou ) na stack de operadores, corrija!`;
+      console.log("( ou ) na stack de operadores, corrija!");
     }
 
     if (verbose) {
       console.log(ver);
     }
+
     return result;
   }
 
