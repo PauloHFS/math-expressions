@@ -8,11 +8,10 @@ Esta aplicação resolve expressões matemáticas como as do [exemplo](https://g
 
 `$ cd solve-expression`
 
-`$ node bin/index.js 'expression'` 
+`$ node bin/index.js 'expression'`
 
 ou
 
 `# npm install -g .` então
 
 `$ solve-expression 'expression'`
-
