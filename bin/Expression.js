@@ -1,59 +1,160 @@
 module.exports = class Expression {
   constructor(expression) {
-    this.operands = []; //numeros
-    this.operators = [];
-
     this.expression = "";
     for (let i = 0; i < expression.length; i++) {
       if (expression[i] != " ") {
         this.expression += expression[i];
       }
     }
-    this.expression += ")";
   }
 
-  solve() {
-    this.position = 0;
+  solve(verbose = false) {
+    let numeros = [];
+    let operadores = [];
 
-    while (this.position < this.expression.length) {
-      const tkn = this.expression[this.position];
-      if (tkn == ")") {
-        const result = this.efetuarOperacao(
-          this.operators.pop,
-          this.operands.pop,
-          this.operands.pop
-        );
-        this.operands.push(result);
-        this.operators.pop();
-      } else if (tkn == "+") {
-        this.operators.push(tkn);
+    let position = 0;
+
+    let tkn = "";
+    while (position < this.expression.length) {
+      tkn = this.expression[position];
+      if (this.isOperador(tkn)) {
+        //!tkn é um operador
+        if (operadores == []) {
+          //!não há operadores na pilha
+          operadores.push(tkn);
+        } else {
+          //!há operadores na pilha
+
+          while (
+            //!há operações e tkn tem menos preferencia que há ultima na pilha
+            operadores.length != 0 &&
+            this.precedenceOf(tkn) <
+              this.precedenceOf(operadores[operadores.length - 1])
+          ) {
+            let result = this.efetuarOperacao(
+              numeros.pop(),
+              operadores.pop(),
+              numeros.pop(),
+              verbose
+            );
+
+            numeros.push(result);
+          }
+
+          operadores.push(tkn);
+        }
+      } else if (tkn == "(") {
+        // !inicia uma nova expressão com maior prioridade
+        operadores.push(tkn);
+      } else if (tkn == ")") {
+        // !resolve a expressão interna
+        while (operadores[operadores.length - 1] != "(") {
+          let result = this.efetuarOperacao(
+            numeros.pop(),
+            operadores.pop(),
+            numeros.pop(),
+            verbose
+          );
+
+          numeros.push(result);
+        }
+        operadores.pop();
       } else {
-        //numeros
-        //TODO: verificar se o numero é maior que o intervalo de 1 caracter
+        //!tkn é um numero
+        let num = tkn;
+        while (position + 1 < this.expression.length) {
+          tkn = this.expression[position + 1];
+          if (!isNaN(tkn)) {
+            num += tkn;
+            position++;
+          } else {
+            break;
+          }
+        }
 
-        this.operands.push(parseInt(tkn));
+        numeros.push(parseInt(num));
       }
-      this.position++;
+      position++;
     }
+
+    while (operadores.length != 0) {
+      let result = this.efetuarOperacao(
+        numeros.pop(),
+        operadores.pop(),
+        numeros.pop(),
+        verbose
+      );
+      numeros.push(result);
+    }
+
+    return numeros.pop();
   }
 
-  efetuarOperacao(operacao, a, b) {
+  efetuarOperacao(a, operacao, b, verbose) {
     let result;
-
+    let ver = "";
     if (operacao == "+") {
       result = a + b;
+      ver = `${a}+${b}=${result}`;
     } else if (operacao == "-") {
-      result = a - b;
+      result = b - a;
+      ver = `${b}-${a}=${result}`;
     } else if (operacao == "*") {
       result = a * b;
+      ver = `${a}x${b}=${result}`;
     } else if (operacao == "/") {
-      result = a / b;
+      if (a == 0) {
+        result = NaN;
+        ver = `${a}/${b} não pode ser feito!`;
+      } else {
+        result = b / a;
+        ver = `${b}/${a}=${result}`;
+      }
+    } else if (operacao == "^") {
+      result = b ** a;
+      ver = `${b}^${a}=${result}`;
+    } else if (operacao == "(" || operacao == ")") {
+      if (a == undefined) {
+        result = b;
+      } else if (b == undefined) {
+        result = a;
+      }
+      ver = `( ou ) na stack de operadores, corrija!`;
     }
 
+    if (verbose) {
+      console.log(ver);
+    }
     return result;
   }
 
+  isOperador(caracter) {
+    return (
+      caracter == "+" ||
+      caracter == "-" ||
+      caracter == "*" ||
+      caracter == "/" ||
+      caracter == "^"
+    );
+  }
+
+  precedenceOf(operador) {
+    let precedence = 0;
+    if (operador == "^") {
+      precedence = 5;
+    } else if (operador == "*") {
+      precedence = 4;
+    } else if (operador == "/") {
+      precedence = 3;
+    } else if (operador == "+") {
+      precedence = 2;
+    } else if (operador == "-") {
+      precedence = 1;
+    }
+    return precedence;
+  }
+
   toString() {
-    return "Operands: " + this.operands + "\n" + "Operators: " + this.operators;
+    return this.expression;
   }
 };
