@@ -1,0 +1,12 @@
+{
+  "name": "solve-expression",
+  "version": "1.0.0",
+  "description": "Solve math expressions!",
+  "main": "bin/index.js",
+  "repository": "git@github.com:PauloHFS/solve-expression.git",
+  "author": "Paulo Hernane",
+  "license": "MIT",
+  "bin": {
+    "solve-expression": "./bin/index.js"
+  }
+}
